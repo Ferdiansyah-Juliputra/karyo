@@ -1,8 +1,8 @@
 from pathlib import Path
 from werkzeug.utils import secure_filename
 from flask import Blueprint, jsonify, request
-from backend.app.config.config import UPLOAD_FOLDER
-from backend.app.loaders.document_loader import load_document
+from app.config.config import UPLOAD_FOLDER
+from app.loaders.document_loader import load_document
 
 UPLOAD_FOLDER = Path(UPLOAD_FOLDER)
 

@@ -1,21 +1,32 @@
 from flask import Flask, render_template
 from flasgger import Swagger
+from flask_cors import CORS
 
-from backend.app.config.config import (
+from app.config.config import (
     RATELIMIT_DEFAULT_LIMITS,
     RATELIMIT_ENABLED,
     RATELIMIT_REVIEW_LIMITS,
     RATELIMIT_STORAGE_URI,
 )
-from backend.app.error_handler import register_error_handlers
-from backend.app.extensions import limiter
-from backend.app.routes.health import health_bp
-from backend.app.routes.resume import resume_bp
-from backend.app.routes.review_service import review_bp
+from app.error_handler import register_error_handlers
+from app.extensions import limiter
+from app.routes.health import health_bp
+from app.routes.resume import resume_bp
+from app.routes.review_service import review_bp
 
 
 def create_app(test_config=None):
     app = Flask(__name__)
+    CORS(
+        app,
+        resources={
+            r"/*":{
+                "origins":[
+                    "http://localhost:3000"
+                ]
+            }
+        }
+    )
     app.config.from_mapping(
         RATELIMIT_ENABLED=RATELIMIT_ENABLED,
         RATELIMIT_STORAGE_URI=RATELIMIT_STORAGE_URI,

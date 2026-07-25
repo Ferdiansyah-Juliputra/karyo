@@ -1,7 +1,7 @@
 from io import BytesIO
 
 from backend.app import create_app
-from backend.app.schemas.review import ResumeReview
+from app.schemas.review import ResumeReview
 
 
 def test_review_is_rate_limited(monkeypatch):

@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 
-from backend.app.config.config import OPENROUTER_MODEL
-from backend.app.extensions import limiter
+from app.config.config import OPENROUTER_MODEL
+from app.extensions import limiter
 
 health_bp = Blueprint("health", __name__)
 

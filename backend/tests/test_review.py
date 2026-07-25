@@ -1,6 +1,6 @@
 from io import BytesIO
 
-from backend.app.schemas.review import ResumeReview
+from app.schemas.review import ResumeReview
 
 
 def test_review_success(client, monkeypatch):

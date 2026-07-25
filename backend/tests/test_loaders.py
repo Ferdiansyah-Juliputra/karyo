@@ -1,6 +1,6 @@
 import pytest
-from backend.app.loaders.document_loader import load_document
-from backend.app.exceptions import ValidationError
+from app.loaders.document_loader import load_document
+from app.exceptions import ValidationError
 
 def test_invalid_document_type():
     with pytest.raises(ValidationError):

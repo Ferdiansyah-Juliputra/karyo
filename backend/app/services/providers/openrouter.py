@@ -1,13 +1,13 @@
 import time
 import requests
 
-from backend.app.config.config import (
+from app.config.config import (
     OPENROUTER_API_KEY,
     OPENROUTER_BASE_URL,
     OPENROUTER_MODEL,
 )
-from backend.app.exceptions import OpenRouterError
-from backend.app.logger.logger import logger
+from app.exceptions import OpenRouterError
+from app.logger.logger import logger
 
 
 def generate(prompt: str) -> str:

@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from backend.app.exceptions import ValidationError
-from backend.app.loaders.pdf_loader import load_pdf
-from backend.app.loaders.docx_loader import load_docx
-from backend.app.loaders.text_loader import load_text
+from app.exceptions import ValidationError
+from app.loaders.pdf_loader import load_pdf
+from app.loaders.docx_loader import load_docx
+from app.loaders.text_loader import load_text
 
 LOADERS = {
     "pdf": load_pdf,

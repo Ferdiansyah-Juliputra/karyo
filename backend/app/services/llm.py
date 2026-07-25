@@ -1,11 +1,11 @@
 from langchain_openai import ChatOpenAI
 
-from backend.app.config.config import (
+from app.config.config import (
     OPENROUTER_API_KEY,
     OPENROUTER_BASE_URL,
     OPENROUTER_MODEL,
 )
-from backend.app.schemas.review import ResumeReview
+from app.schemas.review import ResumeReview
 
 
 def generate_response(prompt: str) -> ResumeReview:
