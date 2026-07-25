@@ -3,10 +3,10 @@ from pathlib import Path
 from flask import Blueprint, current_app, jsonify, request
 from werkzeug.utils import secure_filename
 
-from app.config.config import UPLOAD_FOLDER
-from app.extensions import limiter
-from app.loaders.document_loader import load_document
-from app.services.resume_review import review_resume
+from backend.app.config.config import UPLOAD_FOLDER
+from backend.app.extensions import limiter
+from backend.app.loaders.document_loader import load_document
+from backend.app.services.resume_review import review_resume
 
 review_bp = Blueprint("review", __name__)
 

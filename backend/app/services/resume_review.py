@@ -1,6 +1,6 @@
-from app.prompts.review_prompt import build_review_prompt
-from app.services.llm import generate_response
-from app.schemas.review import ResumeReview
+from backend.app.prompts.review import build_review_prompt
+from backend.app.services.llm import generate_response
+from backend.app.schemas.review import ResumeReview
 
 
 def review_resume(
