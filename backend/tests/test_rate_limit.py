@@ -1,6 +1,6 @@
 from io import BytesIO
 
-from backend.app import create_app
+from app import create_app
 from app.schemas.review import ResumeReview
 
 

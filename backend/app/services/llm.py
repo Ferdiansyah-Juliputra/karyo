@@ -1,5 +1,5 @@
 from langchain_openai import ChatOpenAI
-from logger.logger import logger
+from app.logger.logger import logger
 
 from app.config.config import (
     OPENROUTER_API_KEY,
