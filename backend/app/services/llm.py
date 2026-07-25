@@ -1,4 +1,5 @@
 from langchain_openai import ChatOpenAI
+from logger.logger import logger
 
 from app.config.config import (
     OPENROUTER_API_KEY,
@@ -22,5 +23,8 @@ def generate_response(prompt: str) -> ResumeReview:
         ResumeReview,
         method="json_schema",
     )
-
-    return structured_model.invoke(prompt)
+    try:
+        return structured_model.invoke(prompt)
+    except Exception as e:
+        logger.exception(e)
+        raise

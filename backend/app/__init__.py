@@ -12,7 +12,7 @@ from app.error_handler import register_error_handlers
 from app.extensions import limiter
 from app.routes.health import health_bp
 from app.routes.resume import resume_bp
-from app.routes.review_service import review_bp
+from app.routes.review import review_bp
 
 
 def create_app(test_config=None):
