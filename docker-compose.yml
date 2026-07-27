@@ -1,8 +1,12 @@
 services:
   api:
-    image: openrouter-flask-api
-    build: .
-    container_name: openrouter-flask-api
+    container_name: karyo-backend
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: karyo-backend:latest
 
     ports:
       - "5000:5000"
@@ -21,6 +25,7 @@ services:
 
   redis:
     image: redis:7-alpine
+
     restart: unless-stopped
 
     healthcheck:
