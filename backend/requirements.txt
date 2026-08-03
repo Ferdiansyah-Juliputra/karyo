@@ -12,6 +12,7 @@ psycopg2-binary==2.9.10
 # Authentication
 Flask-JWT-Extended==4.7.1
 bcrypt==4.3.0
+flask-bcrypt==1.0.1
 
 # Supabase
 supabase==2.18.1

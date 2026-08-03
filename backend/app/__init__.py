@@ -15,9 +15,13 @@ from app.routes.resume import resume_bp
 from app.routes.review import review_bp
 from app.routes.auth import auth_bp
 
+from app.extensions import db, bcrypt
+
 
 def create_app(test_config=None):
     app = Flask(__name__)
+    db.init_app(app)
+    bcrypt.init_app(app)
     CORS(
         app,
         origins=["http://localhost:3000"],
