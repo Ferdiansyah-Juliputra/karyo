@@ -33,7 +33,7 @@ export default function LoginForm() {
 
       console.log(response.data);
 
-      router.push("/dashboard");
+      router.push("/home");
     } catch (err: any) {
       alert(
         err.response?.data?.message ??

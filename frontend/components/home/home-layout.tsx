@@ -5,7 +5,7 @@ interface Props {
   children: ReactNode;
 }
 
-export default function DashboardLayout({
+export default function HomeLayout({
   children,
 }: Props) {
   return (
@@ -20,7 +20,7 @@ export default function DashboardLayout({
         <nav className="mt-10 space-y-2">
 
           <Link
-            href="/dashboard"
+            href="/home"
             className="block rounded-xl bg-emerald-50 px-4 py-3"
           >
             Dashboard

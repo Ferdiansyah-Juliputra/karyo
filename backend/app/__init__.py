@@ -7,6 +7,8 @@ from app.config.config import (
     RATELIMIT_ENABLED,
     RATELIMIT_REVIEW_LIMITS,
     RATELIMIT_STORAGE_URI,
+    SQLALCHEMY_DATABASE_URI,
+    SQLALCHEMY_TRACK_MODIFICATIONS,
 )
 from app.error_handler import register_error_handlers
 from app.extensions import limiter
@@ -20,6 +22,8 @@ from app.extensions import db, bcrypt
 
 def create_app(test_config=None):
     app = Flask(__name__)
+    app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = SQLALCHEMY_TRACK_MODIFICATIONS
     db.init_app(app)
     bcrypt.init_app(app)
     CORS(

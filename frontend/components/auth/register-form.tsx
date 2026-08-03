@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export default function RegisterForm() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
@@ -14,7 +16,7 @@ export default function RegisterForm() {
     confirmPassword: "",
   });
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (form.password !== form.confirmPassword) {
@@ -33,7 +35,7 @@ export default function RegisterForm() {
 
       alert("Account created!");
 
-      window.location.href = "/";
+      router.push("/");
     } catch (err: any) {
       alert(err.response?.data?.message ?? "Register failed");
     } finally {

@@ -1,10 +1,10 @@
-import DashboardLayout from "@/components/dashboard/dashboard-layout";
-import UploadCard from "@/components/dashboard/upload-card";
-import RequirementInput from "@/components/dashboard/requirement-input";
+import HomeLayout from "@/components/home/home-layout";
+import UploadCard from "@/components/home/upload-card";
+import RequirementInput from "@/components/home/requirement-input";
 
-export default function DashboardPage() {
+export default function HomePage() {
   return (
-    <DashboardLayout>
+    <HomeLayout>
       <div className="space-y-8">
 
         <div>
@@ -22,6 +22,6 @@ export default function DashboardPage() {
         <RequirementInput />
 
       </div>
-    </DashboardLayout>
+    </HomeLayout>
   );
 }
