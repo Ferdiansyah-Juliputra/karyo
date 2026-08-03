@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, redirect
 from flasgger import Swagger
 from flask_cors import CORS
 
@@ -13,19 +13,15 @@ from app.extensions import limiter
 from app.routes.health import health_bp
 from app.routes.resume import resume_bp
 from app.routes.review import review_bp
+from app.routes.auth import auth_bp
 
 
 def create_app(test_config=None):
     app = Flask(__name__)
     CORS(
         app,
-        resources={
-            r"/*":{
-                "origins":[
-                    "http://localhost:3000"
-                ]
-            }
-        }
+        origins=["http://localhost:3000"],
+        supports_credentials=True,
     )
     app.config.from_mapping(
         RATELIMIT_ENABLED=RATELIMIT_ENABLED,
@@ -60,11 +56,12 @@ def create_app(test_config=None):
     app.register_blueprint(health_bp)
     app.register_blueprint(resume_bp)
     app.register_blueprint(review_bp)
+    app.register_blueprint(auth_bp)
 
     register_error_handlers(app)
 
     @app.route("/")
     def index():
-        return render_template("index.html")
+        return redirect("/health")
 
     return app
