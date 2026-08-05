@@ -13,14 +13,17 @@ const authRoutes = [
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("access_token")?.value;
-
   const { pathname } = request.nextUrl;
 
-  const isProtected = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
+  // Root
+  if (pathname === "/") {
+    return NextResponse.redirect(
+      new URL(token ? "/home" : "/login", request.url)
+    );
+  }
 
-  const isAuthPage = authRoutes.some((route) =>
+  // Protected pages
+  const isProtected = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   );
 
@@ -29,6 +32,11 @@ export function middleware(request: NextRequest) {
       new URL("/login", request.url)
     );
   }
+
+  // Auth pages
+  const isAuthPage = authRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
 
   if (token && isAuthPage) {
     return NextResponse.redirect(
@@ -41,10 +49,11 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/",
+    "/login",
+    "/register",
     "/home/:path*",
     "/history/:path*",
     "/profile/:path*",
-    "/login",
-    "/register",
   ],
 };

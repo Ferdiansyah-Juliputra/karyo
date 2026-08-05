@@ -36,8 +36,12 @@ export default function RegisterForm() {
       alert("Account created!");
 
       router.push("/");
-    } catch (err: any) {
-      alert(err.response?.data?.message ?? "Register failed");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        alert(err.response?.data?.message ?? "Register failed");
+      } else {
+        alert("An error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

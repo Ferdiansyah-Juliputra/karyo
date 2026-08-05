@@ -43,42 +43,22 @@ def register_user(data):
 
 
 def login_user(data):
-    """
-    Authenticate user.
-    """
 
     email = data.get("email", "").strip().lower()
     password = data.get("password", "")
 
     if not email or not password:
-        return {
-            "success": False,
-            "message": "Email and password are required."
-        }, 400
+        raise ValueError("Email and password are required.")
 
     user = User.query.filter_by(email=email).first()
 
     if not user:
-        return {
-            "success": False,
-            "message": "Invalid email or password."
-        }, 401
+        raise ValueError("Invalid email or password.")
 
     if not bcrypt.check_password_hash(
         user.password_hash,
         password,
     ):
-        return {
-            "success": False,
-            "message": "Invalid email or password."
-        }, 401
+        raise ValueError("Invalid email or password.")
 
-    return {
-        "success": True,
-        "message": "Login successful.",
-        "user": {
-            "id": user.id,
-            "name": user.name,
-            "email": user.email,
-        },
-    }, 200
+    return user

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import api from "@/lib/api";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginForm() {
@@ -23,22 +24,23 @@ export default function LoginForm() {
     try {
       setLoading(true);
 
-      const response = await axios.post(
-        "http://localhost:5000/auth/login",
-        form,
-        {
-          withCredentials: true,
-        }
-      );
+    const response = await api.post(
+      "/auth/login",
+      form
+    );
 
       console.log(response.data);
 
       router.push("/home");
-    } catch (err: any) {
-      alert(
-        err.response?.data?.message ??
-        "Invalid email or password."
-      );
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        alert(
+          err.response?.data?.message ??
+          "Invalid email or password."
+        );
+      } else {
+        alert("An error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -121,12 +123,12 @@ export default function LoginForm() {
       </form>
 
       <p className="mt-6 text-center text-sm text-gray-500">
-        Don't have an account?{" "}
+        New here?{" "}
         <Link
           href="/register"
           className="font-medium text-emerald-600"
         >
-          Create one
+          Create an account
         </Link>
       </p>
 

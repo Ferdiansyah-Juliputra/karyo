@@ -9,6 +9,11 @@ from app.config.config import (
     RATELIMIT_STORAGE_URI,
     SQLALCHEMY_DATABASE_URI,
     SQLALCHEMY_TRACK_MODIFICATIONS,
+    JWT_SECRET_KEY,
+    JWT_TOKEN_LOCATION,
+    JWT_ACCESS_COOKIE_NAME,
+    JWT_COOKIE_SECURE,
+    JWT_COOKIE_CSRF_PROTECT,
 )
 from app.error_handler import register_error_handlers
 from app.extensions import limiter
@@ -17,15 +22,22 @@ from app.routes.resume import resume_bp
 from app.routes.review import review_bp
 from app.routes.auth import auth_bp
 
-from app.extensions import db, bcrypt
+from app.extensions import db, bcrypt, jwt
 
 
 def create_app(test_config=None):
     app = Flask(__name__)
     app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = SQLALCHEMY_TRACK_MODIFICATIONS
+    app.config["JWT_SECRET_KEY"] = JWT_SECRET_KEY
+    app.config["JWT_TOKEN_LOCATION"] = JWT_TOKEN_LOCATION
+    app.config["JWT_ACCESS_COOKIE_NAME"] = JWT_ACCESS_COOKIE_NAME
+    app.config["JWT_COOKIE_SECURE"] = JWT_COOKIE_SECURE
+    app.config["JWT_COOKIE_CSRF_PROTECT"] = JWT_COOKIE_CSRF_PROTECT
     db.init_app(app)
     bcrypt.init_app(app)
+    jwt.init_app(app)
+
     CORS(
         app,
         origins=["http://localhost:3000"],
