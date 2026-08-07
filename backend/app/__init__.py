@@ -34,15 +34,6 @@ def create_app(test_config=None):
     app.config["JWT_ACCESS_COOKIE_NAME"] = JWT_ACCESS_COOKIE_NAME
     app.config["JWT_COOKIE_SECURE"] = JWT_COOKIE_SECURE
     app.config["JWT_COOKIE_CSRF_PROTECT"] = JWT_COOKIE_CSRF_PROTECT
-    db.init_app(app)
-    bcrypt.init_app(app)
-    jwt.init_app(app)
-
-    CORS(
-        app,
-        origins=["http://localhost:3000"],
-        supports_credentials=True,
-    )
     app.config.from_mapping(
         RATELIMIT_ENABLED=RATELIMIT_ENABLED,
         RATELIMIT_STORAGE_URI=RATELIMIT_STORAGE_URI,
@@ -55,9 +46,17 @@ def create_app(test_config=None):
         RATELIMIT_STRATEGY="fixed-window",
         RATELIMIT_HEADERS_ENABLED=True,
     )
-
     if test_config is not None:
         app.config.update(test_config)
+    db.init_app(app)
+    bcrypt.init_app(app)
+    jwt.init_app(app)
+
+    CORS(
+        app,
+        origins=["http://localhost:3000"],
+        supports_credentials=True,
+    )
 
     swagger_template = {
         "swagger": "2.0",

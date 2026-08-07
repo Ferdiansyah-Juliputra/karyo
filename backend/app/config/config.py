@@ -32,7 +32,10 @@ RATELIMIT_REVIEW_LIMITS = os.getenv(
     "3/minute;15/hour",
 )
 
-SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+SQLALCHEMY_DATABASE_URI = os.getenv(
+    "DATABASE_URL",
+    "sqlite:///app.db",
+)
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=1)
