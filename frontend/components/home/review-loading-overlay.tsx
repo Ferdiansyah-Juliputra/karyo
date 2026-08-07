@@ -33,7 +33,7 @@ export default function ReviewLoadingOverlay() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.35 }}
-      className="absolute inset-0 z-20 flex items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-500/10 via-white/80 to-teal-500/10 backdrop-blur-md"
+      className="absolute inset-0 z-20 flex items-center justify-center rounded-3xl bg-linear-to-br from-emerald-500/10 via-white/80 to-teal-500/10 backdrop-blur-md"
     >
       <motion.div
         initial={{ opacity: 0, y: 18, scale: 0.96 }}
