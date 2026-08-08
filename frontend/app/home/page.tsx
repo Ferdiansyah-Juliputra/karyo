@@ -65,8 +65,9 @@ export default function HomePage() {
 
   return (
     <HomeLayout>
-      <div className="space-y-8">
+      <div className="mx-auto w-full max-w-350 space-y-6 px-8 py-8">
 
+        {/* PAGE HEADER */}
         <div>
           <h1 className="text-3xl font-bold">
             Resume Review
@@ -77,12 +78,16 @@ export default function HomePage() {
           </p>
         </div>
 
+        {/* UPLOAD */}
         <UploadCard onFileChange={setResumeFile} />
 
+        {/* JOB REQUIREMENTS */}
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
 
           <button
-            onClick={() => setRequirementExpanded(!requirementExpanded)}
+            onClick={() =>
+              setRequirementExpanded(!requirementExpanded)
+            }
             className="flex w-full items-center justify-between px-6 py-5 transition hover:bg-slate-50"
           >
             <div className="flex items-center gap-3">
@@ -135,8 +140,10 @@ export default function HomePage() {
               </motion.div>
             )}
           </AnimatePresence>
+
         </div>
 
+        {/* REVIEW RESULT */}
         <AnimatePresence mode="wait">
           {(loading || result) && (
             <motion.div
