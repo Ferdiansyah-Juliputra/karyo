@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import create_access_token, set_access_cookies, decode_token
+from flask_jwt_extended import create_access_token, set_access_cookies
 from app.services.auth_service import register_user, login_user
 from app.config.config import JWT_ACCESS_TOKEN_EXPIRES
 
