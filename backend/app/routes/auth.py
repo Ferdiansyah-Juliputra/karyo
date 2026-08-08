@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import create_access_token, set_access_cookies
+from flask_jwt_extended import create_access_token, set_access_cookies, decode_token
 from app.services.auth_service import register_user, login_user
+from app.config.config import JWT_ACCESS_TOKEN_EXPIRES
 
 auth_bp = Blueprint(
     "auth",
@@ -33,9 +34,12 @@ def login():
             },
         })
 
+        max_age = int(JWT_ACCESS_TOKEN_EXPIRES.total_seconds())
+
         set_access_cookies(
             response,
             token,
+            max_age=max_age,
         )
 
         return response

@@ -7,9 +7,6 @@ from sqlalchemy import text
 app = create_app()
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.session.execute(text('SELECT 1'))  # Test the database connection
-        print("Database connection successful.")
     app.run(
         host='0.0.0.0',
         port=5000,
