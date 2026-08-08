@@ -27,10 +27,7 @@ function useAnimatedScore(
   const [value, setValue] = useState(0);
 
   useEffect(() => {
-    if (!enabled) {
-      setValue(0);
-      return;
-    }
+    if (!enabled) return;
 
     let frame = 0;
     const start = performance.now();
@@ -68,15 +65,10 @@ function useStreamReveal(
   const [displayed, setDisplayed] = useState("");
 
   useEffect(() => {
-    if (!enabled) {
-      setDisplayed("");
-      return;
-    }
+    if (!enabled) return;
 
     const words = text.trim().split(/\s+/);
     let index = 0;
-
-    setDisplayed("");
 
     const timer = window.setInterval(() => {
       if (index >= words.length) {
@@ -86,7 +78,10 @@ function useStreamReveal(
 
       const nextWords = words.slice(
         0,
-        Math.min(index + wordsPerTick, words.length)
+        Math.min(
+          index + wordsPerTick,
+          words.length
+        )
       );
 
       setDisplayed(nextWords.join(" "));
@@ -156,19 +151,7 @@ export default function ReviewResult({
    * Runs whenever a new review starts or
    * the result disappears.
    */
-  useEffect(() => {
-    if (!result || loading) {
-      setRevealStarted(false);
-
-      setVisibleSections({
-        summary: false,
-        strengths: false,
-        missingSkills: false,
-        recommendations: false,
-      });
-    }
-  }, [result, loading]);
-
+  
   /*
    * AUTO SCROLL
    *
