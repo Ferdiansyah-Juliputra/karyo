@@ -18,8 +18,8 @@ dist/
 *.egg-info/
 .pytest_cache/
 
-app/storage/uploads/*
-!app/storage/uploads/.gitkeep
+backend/app/storage/uploads/*
+!backend/app/storage/uploads/.gitkeep
 
-app/storage/vector_db/*
-!app/storage/vector_db/.gitkeep
+backend/app/storage/vector_db/*
+!backend/app/storage/vector_db/.gitkeep
