@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import axios from "axios";
@@ -28,14 +28,14 @@ export default function HomePage() {
 
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const stopPolling = () => {
+  const stopPolling = useCallback(() => {
     if (pollingRef.current) {
       clearInterval(pollingRef.current);
       pollingRef.current = null;
     }
-  };
+  }, []);
 
-  const fetchReviewStatus = async (reviewId: string) => {
+  const fetchReviewStatus = useCallback(async (reviewId: string) => {
     try {
       const response = await api.get(`/review/${reviewId}`);
       const review = response.data.data;
@@ -78,9 +78,9 @@ export default function HomePage() {
 
       return false;
     }
-  };
+  }, []);
 
-  const startPolling = (reviewId: string) => {
+  const startPolling = useCallback((reviewId: string) => {
     stopPolling();
 
     pollingRef.current = setInterval(async () => {
@@ -90,7 +90,7 @@ export default function HomePage() {
         stopPolling();
       }
     }, POLLING_INTERVAL);
-  };
+  }, [fetchReviewStatus, stopPolling]);
 
   useEffect(() => {
     const activeReviewId = localStorage.getItem(
@@ -120,7 +120,7 @@ export default function HomePage() {
     return () => {
       stopPolling();
     };
-  }, []);
+  }, [fetchReviewStatus, startPolling, stopPolling]);
 
   const handleAnalyze = async () => {
     setIsRestored(false);

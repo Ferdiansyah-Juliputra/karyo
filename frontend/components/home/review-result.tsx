@@ -31,12 +31,7 @@ function useAnimatedScore(
   );
 
   useEffect(() => {
-    if (instant) {
-      setValue(target);
-      return;
-    }
-
-    if (!enabled) return;
+    if (instant || !enabled) return;
 
     let frame = 0;
     const start = performance.now();
@@ -62,7 +57,7 @@ function useAnimatedScore(
     return () => cancelAnimationFrame(frame);
   }, [target, enabled, duration, instant]);
 
-  return value;
+  return instant ? target : value;
 }
 
 function useStreamReveal(
@@ -77,12 +72,7 @@ function useStreamReveal(
   );
 
   useEffect(() => {
-    if (instant) {
-      setDisplayed(text);
-      return;
-    }
-
-    if (!enabled) return;
+    if (instant || !enabled) return;
 
     const words = text.trim().split(/\s+/);
     let index = 0;
@@ -108,7 +98,7 @@ function useStreamReveal(
     return () => window.clearInterval(timer);
   }, [text, enabled, wordsPerTick, interval, instant]);
 
-  return displayed;
+  return instant ? text : displayed;
 }
 
 function RevealItem({
@@ -170,6 +160,17 @@ export default function ReviewResult({
       missingSkills: false,
       recommendations: false,
     });
+
+  const revealStartedOrSkipped =
+    Boolean(skipReveal) || revealStarted;
+  const displayedSections = skipReveal
+    ? {
+        summary: true,
+        strengths: true,
+        missingSkills: true,
+        recommendations: true,
+      }
+    : visibleSections;
 
   const strengthsRef = useRef<HTMLDivElement>(null);
   const missingSkillsRef =
@@ -247,16 +248,7 @@ export default function ReviewResult({
   useEffect(() => {
     if (!result || loading) return;
 
-    if (skipReveal) {
-      setRevealStarted(true);
-      setVisibleSections({
-        summary: true,
-        strengths: true,
-        missingSkills: true,
-        recommendations: true,
-      });
-      return;
-    }
+    if (skipReveal) return;
 
     const timers = [
       window.setTimeout(() => {
@@ -350,14 +342,14 @@ export default function ReviewResult({
 
   const animatedScore = useAnimatedScore(
     result?.ats_score ?? 0,
-    revealStarted && !skipReveal,
+    revealStartedOrSkipped && !skipReveal,
     1200,
     skipReveal
   );
 
   const summaryText = useStreamReveal(
     result?.summary ?? "",
-    visibleSections.summary,
+    displayedSections.summary,
     2,
     35,
     skipReveal
@@ -418,8 +410,8 @@ export default function ReviewResult({
                 }
           }
           animate={{
-            opacity: revealStarted ? 1 : 0.45,
-            y: revealStarted ? 0 : 8,
+            opacity: revealStartedOrSkipped ? 1 : 0.45,
+            y: revealStartedOrSkipped ? 0 : 8,
           }}
           transition={{
             duration: 0.4,
@@ -445,7 +437,7 @@ export default function ReviewResult({
 
         {/* SCORE */}
         <AnimatePresence>
-          {revealStarted && (
+          {revealStartedOrSkipped && (
             <motion.div
               initial={
                 skipReveal
@@ -576,7 +568,7 @@ export default function ReviewResult({
 
         {/* SUMMARY */}
         <AnimatePresence>
-          {visibleSections.summary && (
+          {displayedSections.summary && (
             <motion.div
               initial={
                 skipReveal
@@ -629,7 +621,7 @@ export default function ReviewResult({
         <div className="grid gap-5 lg:grid-cols-3">
           {/* STRENGTHS */}
           <AnimatePresence>
-            {visibleSections.strengths && (
+            {displayedSections.strengths && (
               <motion.div
                 ref={strengthsRef}
                 initial={
@@ -680,7 +672,7 @@ export default function ReviewResult({
 
           {/* MISSING SKILLS */}
           <AnimatePresence>
-            {visibleSections.missingSkills && (
+            {displayedSections.missingSkills && (
               <motion.div
                 ref={missingSkillsRef}
                 initial={
@@ -731,7 +723,7 @@ export default function ReviewResult({
 
           {/* RECOMMENDATIONS */}
           <AnimatePresence>
-            {visibleSections.recommendations && (
+            {displayedSections.recommendations && (
               <motion.div
                 ref={recommendationsRef}
                 initial={

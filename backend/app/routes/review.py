@@ -8,7 +8,6 @@ from werkzeug.utils import secure_filename
 
 from app.config.config import UPLOAD_FOLDER
 from app.extensions import db, limiter
-from app.loaders.document_loader import load_document
 from app.models.resume import Resume
 from app.models.review import Review
 from app.services.review_worker import process_review
