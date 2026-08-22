@@ -5,12 +5,14 @@ import { FileText, Upload } from "lucide-react";
 
 interface UploadCardProps {
   onFileChange: (file: File | null) => void;
+  resumeFilename?: string | null;
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
 export default function UploadCard({
   onFileChange,
+  resumeFilename,
 }: UploadCardProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -62,7 +64,7 @@ export default function UploadCard({
       className={`group cursor-pointer rounded-3xl border-2 border-dashed p-10 text-center transition-all duration-300 ${
         isDragging
           ? "scale-[1.02] border-indigo-500 bg-indigo-50"
-          : file
+          : file || resumeFilename
           ? "border-emerald-500 bg-emerald-50"
           : "border-slate-300 bg-white hover:border-indigo-400 hover:bg-slate-50"
       }`}
@@ -90,7 +92,7 @@ export default function UploadCard({
             : "bg-slate-100 group-hover:bg-indigo-100"
         }`}
       >
-        {file ? (
+        {file || resumeFilename ? (
           <FileText className="h-8 w-8 text-emerald-600" />
         ) : (
           <Upload className="h-8 w-8 text-slate-600" />
@@ -98,16 +100,18 @@ export default function UploadCard({
       </div>
 
       <h3 className="mt-6 text-xl font-semibold text-slate-800">
-        {file ? "Resume Uploaded" : "Upload Your Resume"}
+        {file || resumeFilename ? "Resume Uploaded" : "Upload Your Resume"}
       </h3>
 
       <p className="mt-2 text-sm text-slate-500">
         {file
           ? file.name
+          : resumeFilename
+          ? resumeFilename
           : "Drag & drop your PDF here or click to browse"}
       </p>
 
-      {!file ? (
+      {!file && !resumeFilename ? (
         <p className="mt-2 text-xs text-slate-400">
           PDF only • Maximum 10 MB
         </p>

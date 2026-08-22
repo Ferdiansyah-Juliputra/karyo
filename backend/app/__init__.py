@@ -48,6 +48,8 @@ def create_app(test_config=None):
     jwt.init_app(app)
     limiter.init_app(app)
 
+    from app.models import User, Review, Resume
+
     CORS(
         app,
         origins=["http://localhost:3000"],

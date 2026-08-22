@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import axios from "axios";
 
 import api from "@/lib/api";
-import axios from "axios";
 
 import HomeLayout from "@/components/home/home-layout";
 import UploadCard from "@/components/home/upload-card";
@@ -13,18 +13,124 @@ import RequirementInput from "@/components/home/requirement-input";
 import ReviewResult from "@/components/home/review-result";
 import type { ReviewResultData } from "@/types/review";
 
+const ACTIVE_REVIEW_KEY = "activeReviewId";
+const POLLING_INTERVAL = 1000;
+
 export default function HomePage() {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [requirement, setRequirement] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ReviewResultData | null>(null);
   const [requirementExpanded, setRequirementExpanded] = useState(true);
+  const [resumeFilename, setResumeFilename] = useState<string | null>(null);
   const [reviewKey, setReviewKey] = useState(0);
+  const [isRestored, setIsRestored] = useState(false);
+
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopPolling = () => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  };
+
+  const fetchReviewStatus = async (reviewId: string) => {
+    try {
+      const response = await api.get(`/review/${reviewId}`);
+      const review = response.data.data;
+
+      if (review.job_requirement) {
+        setRequirement(review.job_requirement);
+      }
+
+      if (review.resume) {
+        setResumeFilename(review.resume.filename);
+      }
+
+      if (review.status === "queued" || review.status === "processing") {
+        setLoading(true);
+        return false;
+      }
+
+      if (review.status === "completed") {
+        setResult(review.data);
+        setLoading(false);
+        return true;
+      }
+
+      if (review.status === "failed") {
+        setLoading(false);
+        localStorage.removeItem(ACTIVE_REVIEW_KEY);
+        console.error(review.error ?? "Review failed.");
+        return true;
+      }
+
+      return false;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.error(
+          error.response?.data ?? error.message
+        );
+      } else {
+        console.error(error);
+      }
+
+      return false;
+    }
+  };
+
+  const startPolling = (reviewId: string) => {
+    stopPolling();
+
+    pollingRef.current = setInterval(async () => {
+      const finished = await fetchReviewStatus(reviewId);
+
+      if (finished) {
+        stopPolling();
+      }
+    }, POLLING_INTERVAL);
+  };
+
+  useEffect(() => {
+    const activeReviewId = localStorage.getItem(
+      ACTIVE_REVIEW_KEY
+    );
+
+    if (!activeReviewId) {
+      return;
+    }
+
+    const restoreReview = async () => {
+      setIsRestored(true);
+      setLoading(true);
+      setRequirementExpanded(false);
+
+      const finished = await fetchReviewStatus(
+        activeReviewId
+      );
+
+      if (!finished) {
+        startPolling(activeReviewId);
+      }
+    };
+
+    restoreReview();
+
+    return () => {
+      stopPolling();
+    };
+  }, []);
 
   const handleAnalyze = async () => {
-    if (!resumeFile || !requirement.trim()) return;
-    setReviewKey((prev) => prev + 1);
+    setIsRestored(false);
+    if (!resumeFile || !requirement.trim()) {
+      return;
+    }
 
+    stopPolling();
+
+    setReviewKey((prev) => prev + 1);
     setRequirementExpanded(false);
     setResult(null);
     setLoading(true);
@@ -35,31 +141,38 @@ export default function HomePage() {
       formData.append("resume", resumeFile);
       formData.append("requirement", requirement);
 
-      const start = Date.now();
+      const response = await api.post(
+        "/review",
+        formData
+      );
 
-      const response = await api.post("/review", formData);
+      const reviewId = response.data.review_id;
 
-      const elapsed = Date.now() - start;
-
-      if (elapsed < 1500) {
-        await new Promise(resolve =>
-          setTimeout(resolve, 1500 - elapsed)
+      if (!reviewId) {
+        throw new Error(
+          "Review ID was not returned by the server."
         );
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      localStorage.setItem(
+        ACTIVE_REVIEW_KEY,
+        reviewId
+      );
 
-      setResult(response.data.data);
-      } catch (error: unknown) {
-        setRequirementExpanded(true);
-
-        if (axios.isAxiosError(error)) {
-          console.error(error.response?.data ?? error.message);
-        } else {
-          console.error(error);
-        }
-      } finally {
+      startPolling(reviewId);
+    } catch (error: unknown) {
       setLoading(false);
+      setRequirementExpanded(true);
+
+      if (axios.isAxiosError(error)) {
+        console.error("REVIEW REQUEST FAILED");
+        console.error("status:", error.response?.status);
+        console.error("data:", error.response?.data);
+        console.error("message:", error.message);
+        console.error("url:", error.config?.url);
+      } else {
+        console.error("UNKNOWN ERROR:", error);
+      }
     }
   };
 
@@ -67,7 +180,6 @@ export default function HomePage() {
     <HomeLayout>
       <div className="mx-auto w-full max-w-350 space-y-6 px-8 py-8">
 
-        {/* PAGE HEADER */}
         <div>
           <h1 className="text-3xl font-bold">
             Resume Review
@@ -78,10 +190,11 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* UPLOAD */}
-        <UploadCard onFileChange={setResumeFile} />
+        <UploadCard 
+          onFileChange={setResumeFile}
+          resumeFilename={resumeFilename}
+        />
 
-        {/* JOB REQUIREMENTS */}
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
 
           <button
@@ -143,7 +256,6 @@ export default function HomePage() {
 
         </div>
 
-        {/* REVIEW RESULT */}
         <AnimatePresence mode="wait">
           {(loading || result) && (
             <motion.div
@@ -160,6 +272,7 @@ export default function HomePage() {
                 key={reviewKey}
                 loading={loading}
                 result={result}
+                skipReveal={isRestored}
               />
             </motion.div>
           )}

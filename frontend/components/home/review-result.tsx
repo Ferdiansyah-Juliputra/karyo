@@ -15,6 +15,7 @@ import type { ReviewResultData } from "@/types/review";
 interface ReviewResultProps {
   loading: boolean;
   result: ReviewResultData | null;
+  skipReveal?: boolean;
 }
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -22,11 +23,19 @@ const ease = [0.22, 1, 0.36, 1] as const;
 function useAnimatedScore(
   target: number,
   enabled: boolean,
-  duration = 1200
+  duration = 1200,
+  instant = false
 ) {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(
+    instant ? target : 0
+  );
 
   useEffect(() => {
+    if (instant) {
+      setValue(target);
+      return;
+    }
+
     if (!enabled) return;
 
     let frame = 0;
@@ -51,7 +60,7 @@ function useAnimatedScore(
     frame = requestAnimationFrame(animate);
 
     return () => cancelAnimationFrame(frame);
-  }, [target, enabled, duration]);
+  }, [target, enabled, duration, instant]);
 
   return value;
 }
@@ -60,11 +69,19 @@ function useStreamReveal(
   text: string,
   enabled: boolean,
   wordsPerTick = 2,
-  interval = 35
+  interval = 35,
+  instant = false
 ) {
-  const [displayed, setDisplayed] = useState("");
+  const [displayed, setDisplayed] = useState(
+    instant ? text : ""
+  );
 
   useEffect(() => {
+    if (instant) {
+      setDisplayed(text);
+      return;
+    }
+
     if (!enabled) return;
 
     const words = text.trim().split(/\s+/);
@@ -89,7 +106,7 @@ function useStreamReveal(
     }, interval);
 
     return () => window.clearInterval(timer);
-  }, [text, enabled, wordsPerTick, interval]);
+  }, [text, enabled, wordsPerTick, interval, instant]);
 
   return displayed;
 }
@@ -97,27 +114,41 @@ function useStreamReveal(
 function RevealItem({
   children,
   delay = 0,
+  skipReveal = false,
 }: {
   children: React.ReactNode;
   delay?: number;
+  skipReveal?: boolean;
 }) {
   return (
     <motion.li
-      initial={{
-        opacity: 0,
-        y: 8,
-        filter: "blur(4px)",
-      }}
-      animate={{
-        opacity: 1,
-        y: 0,
-        filter: "blur(0px)",
-      }}
-      transition={{
-        duration: 0.35,
-        delay,
-        ease,
-      }}
+      initial={
+        skipReveal
+          ? false
+          : {
+              opacity: 0,
+              y: 8,
+              filter: "blur(4px)",
+            }
+      }
+      animate={
+        skipReveal
+          ? undefined
+          : {
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+            }
+      }
+      transition={
+        skipReveal
+          ? undefined
+          : {
+              duration: 0.35,
+              delay,
+              ease,
+            }
+      }
     >
       {children}
     </motion.li>
@@ -127,6 +158,7 @@ function RevealItem({
 export default function ReviewResult({
   result,
   loading,
+  skipReveal,
 }: ReviewResultProps) {
   const [revealStarted, setRevealStarted] =
     useState(false);
@@ -186,7 +218,7 @@ export default function ReviewResult({
    * WATCH SECTION REVEALS
    */
   useEffect(() => {
-    if (!revealStarted) return;
+    if (!revealStarted || skipReveal) return;
 
     if (visibleSections.strengths) {
       scrollToSection(strengthsRef);
@@ -206,6 +238,7 @@ export default function ReviewResult({
     visibleSections.missingSkills,
     visibleSections.recommendations,
     revealStarted,
+    skipReveal,
   ]);
 
   /*
@@ -213,6 +246,17 @@ export default function ReviewResult({
    */
   useEffect(() => {
     if (!result || loading) return;
+
+    if (skipReveal) {
+      setRevealStarted(true);
+      setVisibleSections({
+        summary: true,
+        strengths: true,
+        missingSkills: true,
+        recommendations: true,
+      });
+      return;
+    }
 
     const timers = [
       window.setTimeout(() => {
@@ -253,7 +297,7 @@ export default function ReviewResult({
         window.clearTimeout(timer)
       );
     };
-  }, [result, loading]);
+  }, [result, loading, skipReveal]);
 
   /*
    * SCORE INFORMATION
@@ -306,12 +350,17 @@ export default function ReviewResult({
 
   const animatedScore = useAnimatedScore(
     result?.ats_score ?? 0,
-    revealStarted
+    revealStarted && !skipReveal,
+    1200,
+    skipReveal
   );
 
   const summaryText = useStreamReveal(
     result?.summary ?? "",
-    visibleSections.summary
+    visibleSections.summary,
+    2,
+    35,
+    skipReveal
   );
 
   /*
@@ -338,11 +387,15 @@ export default function ReviewResult({
   return (
     <div className="relative">
       <motion.div
-        initial={{
-          opacity: 0,
-          y: 18,
-          scale: 0.985,
-        }}
+        initial={
+          skipReveal
+            ? false
+            : {
+                opacity: 0,
+                y: 18,
+                scale: 0.985,
+              }
+        }
         animate={{
           opacity: 1,
           y: 0,
@@ -356,10 +409,14 @@ export default function ReviewResult({
       >
         {/* HEADER */}
         <motion.div
-          initial={{
-            opacity: 0,
-            y: 8,
-          }}
+          initial={
+            skipReveal
+              ? false
+              : {
+                  opacity: 0,
+                  y: 8,
+                }
+          }
           animate={{
             opacity: revealStarted ? 1 : 0.45,
             y: revealStarted ? 0 : 8,
@@ -390,11 +447,15 @@ export default function ReviewResult({
         <AnimatePresence>
           {revealStarted && (
             <motion.div
-              initial={{
-                opacity: 0,
-                y: 20,
-                scale: 0.97,
-              }}
+              initial={
+                skipReveal
+                  ? false
+                  : {
+                      opacity: 0,
+                      y: 20,
+                      scale: 0.97,
+                    }
+              }
               animate={{
                 opacity: 1,
                 y: 0,
@@ -517,10 +578,14 @@ export default function ReviewResult({
         <AnimatePresence>
           {visibleSections.summary && (
             <motion.div
-              initial={{
-                opacity: 0,
-                y: 15,
-              }}
+              initial={
+                skipReveal
+                  ? false
+                  : {
+                      opacity: 0,
+                      y: 15,
+                    }
+              }
               animate={{
                 opacity: 1,
                 y: 0,
@@ -567,7 +632,10 @@ export default function ReviewResult({
             {visibleSections.strengths && (
               <motion.div
                 ref={strengthsRef}
-                initial={{
+                initial={
+                  skipReveal ?
+                  false
+                  : {
                   opacity: 0,
                   y: 15,
                 }}
@@ -595,6 +663,7 @@ export default function ReviewResult({
                       <RevealItem
                         key={index}
                         delay={index * 0.12}
+                        skipReveal={skipReveal}
                       >
                         <div className="flex items-start gap-2">
                           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
@@ -614,7 +683,10 @@ export default function ReviewResult({
             {visibleSections.missingSkills && (
               <motion.div
                 ref={missingSkillsRef}
-                initial={{
+                initial={
+                  skipReveal ?
+                  false
+                  : {
                   opacity: 0,
                   y: 15,
                 }}
@@ -642,6 +714,7 @@ export default function ReviewResult({
                       <RevealItem
                         key={index}
                         delay={index * 0.12}
+                        skipReveal={skipReveal}
                       >
                         <div className="flex items-start gap-2">
                           <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-orange-600" />
@@ -661,7 +734,10 @@ export default function ReviewResult({
             {visibleSections.recommendations && (
               <motion.div
                 ref={recommendationsRef}
-                initial={{
+                initial={
+                  skipReveal ?
+                  false
+                  : {
                   opacity: 0,
                   y: 15,
                 }}
@@ -689,6 +765,7 @@ export default function ReviewResult({
                       <RevealItem
                         key={index}
                         delay={index * 0.12}
+                        skipReveal={skipReveal}
                       >
                         <div className="flex items-start gap-2">
                           <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
@@ -709,7 +786,10 @@ export default function ReviewResult({
       <AnimatePresence>
         {loading && (
           <motion.div
-            initial={{
+            initial={
+              skipReveal ?
+              false
+              : {
               opacity: 0,
             }}
             animate={{

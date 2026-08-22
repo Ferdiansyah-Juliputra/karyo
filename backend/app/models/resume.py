@@ -7,8 +7,8 @@ from sqlalchemy.dialects.postgresql import UUID
 from app.extensions import db
 
 
-class User(db.Model):
-    __tablename__ = "users"
+class Resume(db.Model):
+    __tablename__ = "resumes"
 
     id = db.Column(
         UUID(as_uuid=True),
@@ -16,42 +16,44 @@ class User(db.Model):
         default=uuid.uuid4,
     )
 
-    name = db.Column(
-        db.String(100),
+    user_id = db.Column(
+        UUID(as_uuid=True),
+        db.ForeignKey(
+            "users.id",
+            ondelete="CASCADE",
+        ),
         nullable=False,
     )
 
-    email = db.Column(
-        db.String(255),
+    filename = db.Column(
+        db.Text,
         nullable=False,
     )
 
-    password_hash = db.Column(
+    storage_path = db.Column(
         db.Text,
         nullable=False,
     )
 
     created_at = db.Column(
         db.DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(timezone.utc)
     )
 
-    updated_at = db.Column(
-        db.DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+    user = db.relationship(
+        "User",
+        back_populates="resumes",
     )
 
-    resumes = db.relationship(
-        "Resume",
-        back_populates="user",
+    reviews = db.relationship(
+        "Review",
+        back_populates="resume",
         cascade="all, delete-orphan",
     )
 
     __table_args__ = (
         Index(
-            "idx_users_email",
-            "email",
-            unique=True,
+            "idx_resume_user",
+            "user_id",
         ),
     )
