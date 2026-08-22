@@ -4,6 +4,7 @@ from app.logger.logger import logger
 from app.config.config import (
     OPENROUTER_API_KEY,
     OPENROUTER_BASE_URL,
+    OPENROUTER_MAX_TOKENS,
     OPENROUTER_MODEL,
 )
 from app.schemas.review import ResumeReview
@@ -18,6 +19,7 @@ def generate_response(prompt: str) -> ResumeReview:
         api_key=OPENROUTER_API_KEY,
         base_url=api_base_url,
         temperature=0,
+        max_tokens=OPENROUTER_MAX_TOKENS,
     )
     structured_model = model.with_structured_output(
         ResumeReview,

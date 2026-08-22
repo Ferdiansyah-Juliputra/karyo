@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { CircleAlert, ChevronDown, ChevronRight } from "lucide-react";
 import axios from "axios";
 
 import api from "@/lib/api";
@@ -16,6 +16,22 @@ import type { ReviewResultData } from "@/types/review";
 const ACTIVE_REVIEW_KEY = "activeReviewId";
 const POLLING_INTERVAL = 1000;
 
+function getReviewErrorMessage(error?: string) {
+  const normalizedError = error?.toLowerCase() ?? "";
+
+  if (
+    normalizedError.includes("429") ||
+    normalizedError.includes("rate-limit")
+  ) {
+    return (
+      "The AI provider is temporarily busy. " +
+      "Please try again in a few minutes."
+    );
+  }
+
+  return error ?? "We couldn't complete the review. Please try again.";
+}
+
 export default function HomePage() {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [requirement, setRequirement] = useState("");
@@ -25,6 +41,7 @@ export default function HomePage() {
   const [resumeFilename, setResumeFilename] = useState<string | null>(null);
   const [reviewKey, setReviewKey] = useState(0);
   const [isRestored, setIsRestored] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
 
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -62,7 +79,7 @@ export default function HomePage() {
       if (review.status === "failed") {
         setLoading(false);
         localStorage.removeItem(ACTIVE_REVIEW_KEY);
-        console.error(review.error ?? "Review failed.");
+        setReviewError(getReviewErrorMessage(review.error));
         return true;
       }
 
@@ -131,6 +148,7 @@ export default function HomePage() {
     stopPolling();
 
     setReviewKey((prev) => prev + 1);
+    setReviewError(null);
     setRequirementExpanded(false);
     setResult(null);
     setLoading(true);
@@ -255,6 +273,27 @@ export default function HomePage() {
           </AnimatePresence>
 
         </div>
+
+        {reviewError && (
+          <div
+            role="alert"
+            className="flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-900 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="flex items-start gap-3">
+              <CircleAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+              <p className="text-sm leading-6">{reviewError}</p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleAnalyze}
+              disabled={!resumeFile || !requirement.trim()}
+              className="shrink-0 rounded-xl border border-amber-300 bg-white px-4 py-2 text-sm font-medium text-amber-800 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Try again
+            </button>
+          </div>
+        )}
 
         <AnimatePresence mode="wait">
           {(loading || result) && (
